@@ -80,11 +80,14 @@ STATUS createCurlApiCallbacks(PCallbacksProvider pCallbacksProvider, PCHAR regio
     // Set the control plane URL
     if (controlPlaneUrl == NULL || controlPlaneUrl[0] == '\0') {
         // Create a fully qualified URI
+        printf("Default control plane URL\n");
         SNPRINTF(pCurlApiCallbacks->controlPlaneUrl, MAX_URI_CHAR_LEN, "%s%s.%s%s", CONTROL_PLANE_URI_PREFIX, KINESIS_VIDEO_SERVICE_NAME,
                  pCurlApiCallbacks->region, CONTROL_PLANE_URI_POSTFIX);
     } else {
         STRNCPY(pCurlApiCallbacks->controlPlaneUrl, controlPlaneUrl, MAX_URI_CHAR_LEN);
+        printf("Setting control plane URL to %s\n", pCurlApiCallbacks->controlPlaneUrl);
     }
+
 
     // NULL terminate in case we overrun
     pCurlApiCallbacks->controlPlaneUrl[MAX_URI_CHAR_LEN] = '\0';

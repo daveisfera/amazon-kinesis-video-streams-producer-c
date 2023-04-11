@@ -53,6 +53,7 @@ PVOID putVideoFrameRoutine(PVOID args)
     STATUS status;
     UINT64 runningTime;
     DOUBLE startUpLatency;
+    UINT64 savedTs;
 
     CHK(data != NULL, STATUS_NULL_ARG);
 
@@ -69,7 +70,11 @@ PVOID putVideoFrameRoutine(PVOID args)
     frame.flags = fileIndex % DEFAULT_KEY_FRAME_INTERVAL == 0 ? FRAME_FLAG_KEY_FRAME : FRAME_FLAG_NONE;
 
     while (defaultGetTime() < data->streamStopTime) {
+        savedTs = frame.presentationTs;
+        frame.decodingTs = 0;
+        frame.presentationTs = 0;
         status = putKinesisVideoFrame(data->streamHandle, &frame);
+        frame.presentationTs = savedTs;
         if (data->firstFrame) {
             startUpLatency = (DOUBLE)(GETTIME() - data->startTime) / (DOUBLE) HUNDREDS_OF_NANOS_IN_A_MILLISECOND;
             DLOGD("Start up latency: %lf ms", startUpLatency);
@@ -141,6 +146,7 @@ PVOID putAudioFrameRoutine(PVOID args)
     UINT32 fileIndex = 0;
     STATUS status;
     UINT64 runningTime;
+    UINT64 savedTs;
 
     CHK(data != NULL, STATUS_NULL_ARG);
 
@@ -157,7 +163,11 @@ PVOID putAudioFrameRoutine(PVOID args)
     while (defaultGetTime() < data->streamStopTime) {
         // no audio can be put until first video frame is put
         if (ATOMIC_LOAD_BOOL(&data->firstVideoFramePut)) {
+            savedTs = frame.presentationTs;
+            frame.decodingTs = 0;
+            frame.presentationTs = 0;
             status = putKinesisVideoFrame(data->streamHandle, &frame);
+            frame.presentationTs = savedTs;
             if (STATUS_FAILED(status)) {
                 printf("putKinesisVideoFrame for audio failed with 0x%08x\n", status);
                 status = STATUS_SUCCESS;

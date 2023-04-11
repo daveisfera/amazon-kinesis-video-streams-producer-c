@@ -62,6 +62,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     DOUBLE startUpLatency;
     BOOL firstFrame = TRUE;
     UINT64 startTime;
+    UINT64 savedTs;
 
     if (argc < 2) {
         defaultLogPrint(
@@ -141,7 +142,11 @@ INT32 main(INT32 argc, CHAR* argv[])
 
         CHK_STATUS(readFrameData(&frame, frameFilePath));
 
+        savedTs = 0;
+        frame.decodingTs = 0;
+        frame.presentationTs = 0;
         CHK_STATUS(putKinesisVideoFrame(streamHandle, &frame));
+        frame.decodingTs = savedTs;
         if (firstFrame) {
             startUpLatency = (DOUBLE)(GETTIME() - startTime) / (DOUBLE) HUNDREDS_OF_NANOS_IN_A_MILLISECOND;
             DLOGD("Start up latency: %lf ms", startUpLatency);

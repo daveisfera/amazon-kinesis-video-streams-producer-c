@@ -5,7 +5,7 @@
 #define DEFAULT_CALLBACK_CHAIN_COUNT      5
 #define DEFAULT_KEY_FRAME_INTERVAL        45
 #define DEFAULT_FPS_VALUE                 25
-#define DEFAULT_STREAM_DURATION           20 * HUNDREDS_OF_NANOS_IN_A_SECOND
+#define DEFAULT_STREAM_DURATION           20 * HUNDREDS_OF_NANOS_IN_A_SECOND * 100
 #define DEFAULT_STORAGE_SIZE              20 * 1024 * 1024
 #define RECORDED_FRAME_AVG_BITRATE_BIT_PS 3800000
 
@@ -147,7 +147,7 @@ INT32 main(INT32 argc, CHAR* argv[])
             DLOGD("Start up latency: %lf ms", startUpLatency);
             firstFrame = FALSE;
         }
-        defaultThreadSleep(frame.duration);
+        defaultThreadSleep(frame.duration * 0.1);
 
         frame.decodingTs += frame.duration;
         frame.presentationTs = frame.decodingTs;

@@ -5,7 +5,7 @@
 #define DEFAULT_CALLBACK_CHAIN_COUNT        5
 #define DEFAULT_KEY_FRAME_INTERVAL          45
 #define DEFAULT_FPS_VALUE                   25
-#define DEFAULT_STREAM_DURATION             20 * HUNDREDS_OF_NANOS_IN_A_SECOND
+#define DEFAULT_STREAM_DURATION             20 * HUNDREDS_OF_NANOS_IN_A_SECOND * 10
 #define SAMPLE_AUDIO_FRAME_DURATION         (20 * HUNDREDS_OF_NANOS_IN_A_MILLISECOND)
 #define SAMPLE_VIDEO_FRAME_DURATION         (HUNDREDS_OF_NANOS_IN_A_SECOND / DEFAULT_FPS_VALUE)
 #define AAC_AUDIO_TRACK_SAMPLING_RATE       48000
@@ -117,10 +117,10 @@ PVOID putVideoFrameRoutine(PVOID args)
         frame.size = data->videoFrames[fileIndex].size;
 
         // synchronize putKinesisVideoFrame to running time
-        runningTime = defaultGetTime() - data->streamStartTime;
+        runningTime = (defaultGetTime() - data->streamStartTime) * 10;
         if (runningTime < frame.presentationTs) {
             // reduce sleep time a little for smoother video
-            THREAD_SLEEP((frame.presentationTs - runningTime) * 0.9);
+            THREAD_SLEEP((frame.presentationTs - runningTime) * 0.09);
         }
     }
 
@@ -172,9 +172,10 @@ PVOID putAudioFrameRoutine(PVOID args)
             frame.size = data->audioFrames[fileIndex].size;
 
             // synchronize putKinesisVideoFrame to running time
-            runningTime = defaultGetTime() - data->streamStartTime;
+            runningTime = (defaultGetTime() - data->streamStartTime) * 10;
             if (runningTime < frame.presentationTs) {
-                THREAD_SLEEP(frame.presentationTs - runningTime);
+                // reduce sleep time a little for smoother video
+                THREAD_SLEEP((frame.presentationTs - runningTime) * 0.09);
             }
         }
     }

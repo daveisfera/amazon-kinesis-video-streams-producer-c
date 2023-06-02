@@ -324,7 +324,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     // use relative time mode. Buffer timestamps start from 0
     pStreamInfo->streamCaps.absoluteFragmentTimes = FALSE;
 
-    data.startTime = GETTIME();
+    data.startTime = GETTIME() - DEFAULT_STREAM_DURATION * 10000;
     data.firstFrame = TRUE;
     CHK_STATUS(createDefaultCallbacksProviderWithAwsCredentials(accessKey, secretKey, sessionToken, MAX_UINT64, region, cacertPath, NULL, NULL,
                                                                 &pClientCallbacks));

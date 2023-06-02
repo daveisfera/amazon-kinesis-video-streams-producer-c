@@ -131,7 +131,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     frame.version = FRAME_CURRENT_VERSION;
     frame.trackId = DEFAULT_VIDEO_TRACK_ID;
     frame.duration = HUNDREDS_OF_NANOS_IN_A_SECOND / DEFAULT_FPS_VALUE;
-    frame.decodingTs = defaultGetTime(); // current time
+    frame.decodingTs = defaultGetTime() - DEFAULT_STREAM_DURATION * 10000; // current time
     frame.presentationTs = frame.decodingTs;
 
     while (defaultGetTime() < streamStopTime) {

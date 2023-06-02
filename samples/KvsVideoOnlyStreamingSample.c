@@ -104,7 +104,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     pDeviceInfo->clientInfo.loggerLogLevel = LOG_LEVEL_DEBUG;
     pDeviceInfo->storageInfo.storageSize = DEFAULT_STORAGE_SIZE;
 
-    CHK_STATUS(createRealtimeVideoStreamInfoProvider(streamName, DEFAULT_RETENTION_PERIOD, DEFAULT_BUFFER_DURATION, &pStreamInfo));
+    CHK_STATUS(createOfflineVideoStreamInfoProvider(streamName, DEFAULT_RETENTION_PERIOD, DEFAULT_BUFFER_DURATION, &pStreamInfo));
     CHK_STATUS(setStreamInfoBasedOnStorageSize(DEFAULT_STORAGE_SIZE, RECORDED_FRAME_AVG_BITRATE_BIT_PS, 1, pStreamInfo));
     // adjust members of pStreamInfo here if needed
 

@@ -293,7 +293,7 @@ INT32 main(INT32 argc, CHAR* argv[])
 
     // generate audio cpd
     if (!STRCMP(audioCodec, AUDIO_CODEC_NAME_ALAW)) {
-        CHK_STATUS(createRealtimeAudioVideoStreamInfoProviderWithCodecs(streamName, DEFAULT_RETENTION_PERIOD, DEFAULT_BUFFER_DURATION, VIDEO_CODEC_ID_H264, AUDIO_CODEC_ID_PCM_ALAW, &pStreamInfo));
+        CHK_STATUS(createOfflineAudioVideoStreamInfoProviderWithCodecs(streamName, DEFAULT_RETENTION_PERIOD, DEFAULT_BUFFER_DURATION, VIDEO_CODEC_ID_H264, AUDIO_CODEC_ID_PCM_ALAW, &pStreamInfo));
 
         // adjust members of pStreamInfo here if needed
 
@@ -305,11 +305,11 @@ INT32 main(INT32 argc, CHAR* argv[])
         CHK_STATUS(mkvgenGeneratePcmCpd(KVS_PCM_FORMAT_CODE_ALAW, ALAW_AUDIO_TRACK_SAMPLING_RATE, ALAW_AUDIO_TRACK_CHANNEL_CONFIG, pAudioTrack->codecPrivateData,
                                     pAudioTrack->codecPrivateDataSize));
     } else {
-        CHK_STATUS(createRealtimeAudioVideoStreamInfoProviderWithCodecs(streamName, DEFAULT_RETENTION_PERIOD, DEFAULT_BUFFER_DURATION, VIDEO_CODEC_ID_H264, AUDIO_CODEC_ID_AAC, &pStreamInfo));
+        CHK_STATUS(createOfflineAudioVideoStreamInfoProviderWithCodecs(streamName, DEFAULT_RETENTION_PERIOD, DEFAULT_BUFFER_DURATION, VIDEO_CODEC_ID_H264, AUDIO_CODEC_ID_AAC, &pStreamInfo));
 
-        // CHK_STATUS(createRealtimeAudioVideoStreamInfoProvider(streamName, DEFAULT_RETENTION_PERIOD, DEFAULT_BUFFER_DURATION, &pStreamInfo));
-        // You can use createRealtimeAudioVideoStreamInfoProvider for H.264 and AAC as it uses them by default 
-        // To specify PCM/G.711 use createRealtimeAudioVideoStreamInfoProviderWithCodecs
+        // CHK_STATUS(createOfflineAudioVideoStreamInfoProvider(streamName, DEFAULT_RETENTION_PERIOD, DEFAULT_BUFFER_DURATION, &pStreamInfo));
+        // You can use createOfflineAudioVideoStreamInfoProvider for H.264 and AAC as it uses them by default 
+        // To specify PCM/G.711 use createOfflineAudioVideoStreamInfoProviderWithCodecs
         // adjust members of pStreamInfo here if needed
 
         // set up audio cpd.

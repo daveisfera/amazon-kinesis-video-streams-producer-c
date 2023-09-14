@@ -16,6 +16,29 @@
 
 #define FILE_LOGGING_BUFFER_SIZE (100 * 1024)
 #define MAX_NUMBER_OF_LOG_FILES  5
+
+BOOL g_error = FALSE;
+
+STATUS customStreamErrorReportCallback(UINT64 customData, STREAM_HANDLE streamHandle, UPLOAD_HANDLE uploadHandle, UINT64 fragmentTimecode,
+                                       STATUS errorStatus)
+{
+    DLOGW("Handling stream");
+
+    g_error = TRUE;
+
+    return STATUS_SUCCESS;
+}
+
+STATUS customClientErrorReportHandler(UINT64 customData, STREAM_HANDLE streamHandle, UPLOAD_HANDLE uploadHandle, UINT64 erroredTimecode,
+                                      STATUS statusCode)
+{
+    DLOGW("Handling client");
+
+    g_error = TRUE;
+
+    return continuousRetryStreamErrorReportHandler(customData, streamHandle, uploadHandle, erroredTimecode, statusCode);
+}
+
 STATUS readFrameData(PFrame pFrame, PCHAR frameFilePath, PCHAR videoCodec)
 {
     STATUS retStatus = STATUS_SUCCESS;
@@ -68,10 +91,11 @@ INT32 main(INT32 argc, CHAR* argv[])
     CHAR videoCodec[VIDEO_CODEC_NAME_MAX_LENGTH];
     STRNCPY(videoCodec, VIDEO_CODEC_NAME_H264, STRLEN(VIDEO_CODEC_NAME_H264)); // h264 video by default
     VIDEO_CODEC_ID videoCodecID = VIDEO_CODEC_ID_H264;
+    UINT32 callbacks = 0;
 
     if (argc < 2) {
         DLOGE("Usage: AWS_ACCESS_KEY_ID=SAMPLEKEY AWS_SECRET_ACCESS_KEY=SAMPLESECRET %s <stream_name> <codec> <duration_in_seconds> "
-              "<frame_files_path>\n",
+              "<frame_files_path> [callbacks]\n",
               argv[0]);
         CHK(FALSE, STATUS_INVALID_ARG);
     }
@@ -82,7 +106,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     }
 
     MEMSET(frameFilePath, 0x00, MAX_PATH_LEN + 1);
-    if (argc < 5) {
+    if (argc < 5 || strlen(argv[4]) == 0) {
         STRCPY(frameFilePath, (PCHAR) "../samples/");
     } else {
         STRNCPY(frameFilePath, argv[4], MAX_PATH_LEN);
@@ -106,6 +130,10 @@ INT32 main(INT32 argc, CHAR* argv[])
         // Get the duration and convert to an integer
         CHK_STATUS(STRTOUI64(argv[3], NULL, 10, &streamingDuration));
         streamingDuration *= HUNDREDS_OF_NANOS_IN_A_SECOND;
+    }
+
+    if (argc >= 6) {
+        CHK_STATUS(STRTOUI32(argv[5], NULL, 10, &callbacks));
     }
 
     streamStopTime = GETTIME() + streamingDuration;
@@ -133,7 +161,13 @@ INT32 main(INT32 argc, CHAR* argv[])
     }
 
     CHK_STATUS(createStreamCallbacks(&pStreamCallbacks));
+    if (callbacks & 1) {
+        pStreamCallbacks->streamErrorReportFn = customStreamErrorReportCallback;
+    }
     CHK_STATUS(addStreamCallbacks(pClientCallbacks, pStreamCallbacks));
+    if (callbacks & 2) {
+        pClientCallbacks->streamErrorReportFn = customClientErrorReportHandler;
+    }
 
     CHK_STATUS(createKinesisVideoClient(pDeviceInfo, pClientCallbacks, &clientHandle));
     CHK_STATUS(createKinesisVideoStreamSync(clientHandle, pStreamInfo, &streamHandle));
@@ -147,7 +181,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     frame.decodingTs = GETTIME(); // current time
     frame.presentationTs = frame.decodingTs;
 
-    while (GETTIME() < streamStopTime) {
+    while (GETTIME() < streamStopTime && !g_error) {
         frame.index = frameIndex;
         frame.flags = fileIndex % DEFAULT_KEY_FRAME_INTERVAL == 0 ? FRAME_FLAG_KEY_FRAME : FRAME_FLAG_NONE;
         frame.size = SIZEOF(frameBuffer);

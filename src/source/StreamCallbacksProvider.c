@@ -54,7 +54,7 @@ STATUS defaultStreamErrorReportCallback(UINT64 customData, STREAM_HANDLE streamH
                                         STATUS errorStatus)
 {
     UNUSED_PARAM(customData);
-    DLOGD("Reported streamError callback for stream handle %" PRIu64 ". Upload handle %" PRIu64 ". Fragment timecode in"
+    DLOGW("Reported streamError callback for stream handle %" PRIu64 ". Upload handle %" PRIu64 ". Fragment timecode in"
           " 100ns: %" PRIu64 ". Error status: 0x%08x",
           streamHandle, uploadHandle, fragmentTimecode, errorStatus);
     return STATUS_SUCCESS;
